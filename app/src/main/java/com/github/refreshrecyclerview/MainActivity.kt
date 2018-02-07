@@ -1,5 +1,6 @@
 package com.github.refreshrecyclerview
 
+import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
         recyclerView.layoutManager = LinearLayoutManager(this)
         swipe_refresh_layout.setOnRefreshListener(this)
         adapter = Adapter(list)
+        adapter.setProgressColors(Color.parseColor("#007557"))
         adapter.bindSwipeRefreshLayout(swipe_refresh_layout)
         recyclerView.adapter = adapter
         adapter.setOnLoadMoreListener(object : KLoadMoreAdapter.OnLoadMoreListener {

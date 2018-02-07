@@ -1,7 +1,7 @@
 package com.github.caijinglong.refresh.library
 
 import android.content.Context
-import android.support.v4.widget.ContentLoadingProgressBar
+import android.graphics.Color
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
@@ -82,7 +82,9 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
     abstract fun bindViewHolder(holder: VH?, position: Int, item: Data)
 
     private fun createDefaultLoadMoreView(parent: ViewGroup): DefaultLoadMoreView {
-        return LayoutInflater.from(parent.context).inflate(R.layout.k_layout_default_loadmore, parent, false) as DefaultLoadMoreView
+        val defaultLoadMoreView = LayoutInflater.from(parent.context).inflate(R.layout.k_layout_default_loadmore, parent, false) as DefaultLoadMoreView
+        defaultLoadMoreView.mViewProgress.progressDrawable.setColorSchemeColors(*mProgressColors)
+        return defaultLoadMoreView
     }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder? {
@@ -153,6 +155,7 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
 
     fun bindSwipeRefreshLayout(swipeRefreshLayout: SwipeRefreshLayout?) {
         this.swipeRefreshLayout = swipeRefreshLayout
+        swipeRefreshLayout?.setColorSchemeColors(*mProgressColors)
         helper?.bindSwipeRefreshLayout(swipeRefreshLayout)
     }
 
@@ -160,13 +163,27 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
         this.swipeRefreshLayout = null
         helper?.unbindSwipeRefreshLayout()
     }
+
+    private var mProgressColors: IntArray = intArrayOf(Color.parseColor("#009944"))
+        set(value) {
+            field = value
+            val v = loadmoreView
+            if (v is DefaultLoadMoreView) {
+                v.setProgressColors(*mProgressColors)
+            }
+        }
+
+    fun setProgressColors(vararg colors: Int) {
+        this.mProgressColors = colors
+        swipeRefreshLayout?.setColorSchemeColors(*colors)
+    }
 }
 
 class DefaultLoadMoreView @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr), KLoadMoreAble {
 
-    val mViewProgress: ContentLoadingProgressBar  by lazy { findViewById<ContentLoadingProgressBar>(R.id.view_progress) }
+    val mViewProgress: KProgressBar  by lazy { findViewById<KProgressBar>(R.id.view_progress) }
     val mTvLoadText: TextView by lazy { findViewById<TextView>(R.id.tv_load_text) }
 
     init {
@@ -176,7 +193,6 @@ class DefaultLoadMoreView @JvmOverloads constructor(
     override fun onLoadMoreStart() {
         mViewProgress.show()
         mTvLoadText.text = "加载中"
-
     }
 
     override fun onLoadMoreEnd() {
@@ -187,6 +203,10 @@ class DefaultLoadMoreView @JvmOverloads constructor(
     override fun onNoMoreData() {
         mViewProgress.hide()
         mTvLoadText.text = "没有更多数据了"
+    }
+
+    fun setProgressColors(vararg colors: Int) {
+        mViewProgress.progressDrawable.setColorSchemeColors(*colors)
     }
 }
 
