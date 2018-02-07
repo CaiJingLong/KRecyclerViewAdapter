@@ -10,7 +10,7 @@ class KLog private constructor() {
     companion object {
         private const val TAG = "KLog"
         @JvmStatic
-        var LOG = true
+        var LOG = false
 
         @JvmStatic
         fun info(msg: Any?) {

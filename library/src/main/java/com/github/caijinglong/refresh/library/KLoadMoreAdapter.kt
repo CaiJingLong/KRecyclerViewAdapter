@@ -19,12 +19,31 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
     var enableLoadMore = true
         set(value) {
             field = value
-        }
-        get() {
-            return field
+            notifyDataSetChanged()
         }
 
     var loadMoring = false
+        set(value) {
+            field = value
+            helper?.onLoadingChange(value)
+            val v = loadmoreView
+            if (v is KLoadMoreAble) {
+                if (value) {
+                    v.onLoadMoreStart()
+                } else {
+                    v.onLoadMoreEnd()
+                }
+            }
+        }
+
+    var noMoreData = false
+        set(value) {
+            field = value
+            val v = loadmoreView
+            if (v is KLoadMoreAble) {
+                v.onNoMoreData()
+            }
+        }
 
     override fun getItemCount(): Int {
         var add = 0
@@ -130,6 +149,16 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
             super.onChanged()
             onDataChange()
         }
+    }
+
+    fun bindSwipeRefreshLayout(swipeRefreshLayout: SwipeRefreshLayout?) {
+        this.swipeRefreshLayout = swipeRefreshLayout
+        helper?.bindSwipeRefreshLayout(swipeRefreshLayout)
+    }
+
+    fun unbindSwipeRefreshLayout() {
+        this.swipeRefreshLayout = null
+        helper?.unbindSwipeRefreshLayout()
     }
 }
 

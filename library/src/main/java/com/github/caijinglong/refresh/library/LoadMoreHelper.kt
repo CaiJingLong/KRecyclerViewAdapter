@@ -39,6 +39,13 @@ class LoadMoreHelper(val recyclerView: RecyclerView?, val loadmoreAdapter: KLoad
             KLog.info("not loadMore")
             return
         }
+        if (loadmoreAdapter.noMoreData) {
+            return
+        }
+        if (swipeRefreshLayout != null && swipeRefreshLayout!!.isRefreshing) {
+            KLog.info("refresh ing")
+            return
+        }
         val itemPosition = lm.findLastVisibleItemPosition()
         KLog.info("the loadMore")
         if (itemPosition >= loadmoreAdapter.list.count()) {
@@ -46,9 +53,20 @@ class LoadMoreHelper(val recyclerView: RecyclerView?, val loadmoreAdapter: KLoad
         }
     }
 
-
     fun disableLoadMore() {
         loadmoreAdapter.enableLoadMore = false
+    }
+
+    fun bindSwipeRefreshLayout(swipeRefreshLayout: SwipeRefreshLayout?) {
+        this.swipeRefreshLayout = swipeRefreshLayout
+    }
+
+    fun unbindSwipeRefreshLayout() {
+        this.swipeRefreshLayout = null
+    }
+
+    fun onLoadingChange(loading: Boolean) {
+        swipeRefreshLayout?.isEnabled = !loading
     }
 
 }
