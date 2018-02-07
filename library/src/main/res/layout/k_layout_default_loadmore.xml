@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.github.caijinglong.refresh.library.DefaultLoadMoreView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="44dp">
+
+</com.github.caijinglong.refresh.library.DefaultLoadMoreView>
