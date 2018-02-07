@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
 
 
-    lateinit var adapter: Adapter
+    private lateinit var adapter: Adapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,10 +39,10 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
         })
     }
 
-    val list = arrayListOf<String>()
+    private val list = arrayListOf<String>()
 
-    val refreshData = arrayListOf<String>()
-    val loadMoreData = arrayListOf("load more 1", "load more 2", "load more 3")
+    private val refreshData = arrayListOf<String>()
+    private val loadMoreData = arrayListOf("load more 1", "load more 2", "load more 3")
 
     init {
         (0 until 50).mapTo(refreshData) { "刷新的数据 $it" }
