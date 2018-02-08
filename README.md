@@ -3,6 +3,29 @@
 一个滚动到底刷新组件,可以结合SwipeRefreshLayout使用
 使用kotlin开发
 
+## install
+
+当前最新版本可以查看tag
+文档编写时为0.8.1
+
+### project's build.gradle
+
+```gradle
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+```
+
+### module's build.gradle
+
+```gradle
+    dependencies {
+            compile 'com.github.CaiJingLong:KRecyclerViewAdapter:0.8.1'
+    }
+```
 ## use
 
 ### 加载完成调用(必须)
