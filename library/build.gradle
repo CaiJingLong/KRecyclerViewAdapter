@@ -2,9 +2,6 @@ apply plugin: 'com.android.library'
 apply plugin: "kotlin-android"
 apply plugin: "kotlin-android-extensions"
 
-apply plugin: 'com.github.dcendents.android-maven'
-group = "com.github.Caijinglong"
-
 android {
     compileSdkVersion 26
 
@@ -35,19 +32,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 }
 
-//def siteUrl = 'https://github.com/CaiJingLong/KRecyclerViewAdapter'      // 项目的主页
-//def gitUrl = 'https://github.com/CaiJingLong/KRecyclerViewAdapter.git'   // Git仓库的url
-//def libraryDesc = 'scroll bottom and loadmore in recyclerView'
-
-
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
-artifacts {
-    archives sourcesJar
-}
+apply from: "${rootProject.rootDir}/jitpack.gradle"
+//apply from: "${rootProject.rootDir}/bintray.gradle"
