@@ -31,6 +31,6 @@ dependencies {
 //    androidTestImplementation 'com.android.support.test:runner:1.0.1'
 //    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 }
-
+group = "com.github.Caijinglong"
 apply from: "${rootProject.rootDir}/jitpack.gradle"
 //apply from: "${rootProject.rootDir}/bintray.gradle"
