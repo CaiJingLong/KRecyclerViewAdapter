@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     class HeaderAdapter(data: String?) : KHeaderAdapter<String, HeaderHolder>(data) {
-        override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): HeaderFooterHolder? {
+        override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): HeaderHolder? {
             if (parent == null) {
                 return null
             }
@@ -170,8 +170,8 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
             return HeaderHolder(view)
         }
 
-        override fun onBindData(holder: HeaderHolder, position: Int) {
-            holder.textView?.text = data
+        override fun onBindViewHolder(holder: HeaderHolder?, position: Int) {
+            holder?.textView?.text = data
         }
 
         override fun itemViewType(): Int {

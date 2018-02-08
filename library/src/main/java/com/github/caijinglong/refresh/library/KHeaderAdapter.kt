@@ -6,7 +6,7 @@ import android.view.View
 /**
  * Created by cai on 2018/2/8.
  */
-abstract class KAdapter<Data, VH : HeaderFooterHolder?>(var data: Data?) : RecyclerView.Adapter<HeaderFooterHolder>() {
+abstract class KAdapter<Data, VH : HeaderFooterHolder?>(var data: Data?) : RecyclerView.Adapter<VH>() {
 
     override fun getItemCount(): Int {
         return 1
@@ -16,12 +16,12 @@ abstract class KAdapter<Data, VH : HeaderFooterHolder?>(var data: Data?) : Recyc
         return itemViewType()
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun onBindViewHolder(holder: HeaderFooterHolder?, position: Int) {
-        onBindData(holder as VH, position)
-    }
+//    @Suppress("UNCHECKED_CAST")
+//    override fun onBindViewHolder(holder: VH?, position: Int) {
+//        onBindData(holder as VH, position)
+//    }
 
-    abstract fun onBindData(holder: VH, position: Int)
+//    abstract fun onBindData(holder: VH, position: Int)
 
     abstract fun itemViewType(): Int
 
