@@ -2,10 +2,10 @@ apply plugin: 'com.android.library'
 apply plugin: "kotlin-android"
 apply plugin: "kotlin-android-extensions"
 
+apply plugin: 'com.github.dcendents.android-maven'
+
 android {
     compileSdkVersion 26
-
-
 
     defaultConfig {
         minSdkVersion 14
@@ -23,7 +23,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
 }
 
 dependencies {
@@ -35,4 +34,21 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+}
+
+//def siteUrl = 'https://github.com/CaiJingLong/KRecyclerViewAdapter'      // 项目的主页
+//def gitUrl = 'https://github.com/CaiJingLong/KRecyclerViewAdapter.git'   // Git仓库的url
+//def libraryDesc = 'scroll bottom and loadmore in recyclerView'
+group = "com.github.Caijinglong"
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+artifacts {
+    archives sourcesJar
 }
