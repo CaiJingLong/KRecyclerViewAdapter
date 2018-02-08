@@ -46,42 +46,88 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
         }
 
     override fun getItemCount(): Int {
-        var add = 0
+        val headerCount = headerAdapterList.count()
+
+        var loadMoreCount = 0
         if (enableLoadMore) {
-            add = 1
+            loadMoreCount = 1
         }
-        return if (list.isEmpty()) 0 else list.size + add
+        return (list.size) + loadMoreCount + headerCount
     }
 
+    //cache the viewType
+    private val headerTypeSet = HashSet<Int>()
+    private val typePositionMap = HashMap<Int, Int>()
 
     override fun getItemViewType(position: Int): Int {
-        if (enableLoadMore && position == list.size) {
-            return TYPE_LOAD_MORE
-
+        if (position < headerAdapterList.count()) {
+            val itemViewType = headerAdapterList[position].itemViewType()
+            headerTypeSet.add(itemViewType)
+            typePositionMap.put(itemViewType, position)
+            return itemViewType
         }
-        return super.getItemViewType(position)
+
+        if (enableLoadMore && position == itemCount - 1) {
+            return TYPE_LOAD_MORE
+        }
+        return getChildItemType(getRealPosition(position))
     }
 
+    open fun getChildItemType(listPosition: Int): Int {
+        return 0
+    }
+
+    private val headerAdapterList = ArrayList<KHeaderAdapter<*, *>>()
+
+    fun addHeaderAdapter(adapter: KHeaderAdapter<*, *>) {
+        headerAdapterList.add(adapter)
+        adapter.attachToKAdapter(this)
+        notifyDataSetChanged()
+    }
+
+    fun removeHeaderAdapter(adapter: KHeaderAdapter<*, *>) {
+        headerAdapterList.remove(adapter)
+        adapter.detachFromKAdapter()
+        notifyDataSetChanged()
+    }
+
+    @Suppress("UNCHECKED_CAST")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
         val itemViewType = getItemViewType(position)
         if (itemViewType == TYPE_LOAD_MORE) {
             return
         }
-        val data = list[position]
+        if (headerTypeSet.contains(itemViewType)) {
+            headerAdapterList[position].onBindViewHolder(holder as HeaderFooterHolder?, position)
+            return
+        }
+        val realPosition = getRealPosition(position)
+        val data = list[realPosition]
         try {
-            @Suppress("UNCHECKED_CAST")
-            bindViewHolder(holder as VH?, position, data)
+            bindViewHolder(holder as VH?, realPosition, data)
         } catch (e: Throwable) {
 
         }
 
     }
 
+    fun getHeaderCount(): Int {
+        return headerAdapterList.count()
+    }
+
+    fun getRealPosition(position: Int): Int {
+        return position - getHeaderCount()
+    }
+
     var loadmoreView: View? = null
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
     abstract fun bindViewHolder(holder: VH?, position: Int, item: Data)
 
-    private fun createDefaultLoadMoreView(parent: ViewGroup): DefaultLoadMoreView {
+    open fun createDefaultLoadMoreView(parent: ViewGroup): View {
         val defaultLoadMoreView = LayoutInflater.from(parent.context).inflate(R.layout.k_layout_default_loadmore, parent, false) as DefaultLoadMoreView
         defaultLoadMoreView.mViewProgress.progressDrawable.setColorSchemeColors(*mProgressColors)
         return defaultLoadMoreView
@@ -92,11 +138,19 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
             return null
         }
 
+        if (headerTypeSet.contains(viewType)) {
+            typePositionMap[viewType]?.apply {
+                val kHeaderAdapter = headerAdapterList[this]
+                return kHeaderAdapter.createViewHolder(parent, viewType)
+            }
+        }
+
         if (viewType == TYPE_LOAD_MORE) {
             return if (loadmoreView == null) {
                 val view = createDefaultLoadMoreView(parent)
                 loadmoreView = view
-                KLoadMoreHolder(view, view)
+                val able: KLoadMoreAble? = if (view is KLoadMoreAble) view else null
+                KLoadMoreHolder(view, able)
             } else {
                 KLoadMoreHolder(loadmoreView, null)
             }

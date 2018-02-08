@@ -48,7 +48,7 @@ class LoadMoreHelper(val recyclerView: RecyclerView?, val loadmoreAdapter: KLoad
         }
         val itemPosition = lm.findLastVisibleItemPosition()
         KLog.info("the loadMore")
-        if (itemPosition >= loadmoreAdapter.list.count()) {
+        if (itemPosition >= loadmoreAdapter.itemCount - 1) {
             loadmoreAdapter.onLoadMore()
         }
     }

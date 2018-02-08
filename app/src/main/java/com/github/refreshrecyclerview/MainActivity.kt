@@ -5,15 +5,18 @@ import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import com.github.caijinglong.refresh.library.HeaderFooterHolder
+import com.github.caijinglong.refresh.library.KHeaderAdapter
 import com.github.caijinglong.refresh.library.KLoadMoreAdapter
-import com.marshalchen.ultimaterecyclerview.UltimateRecyclerviewViewHolder
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.concurrent.TimeUnit
@@ -26,12 +29,14 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        recyclerView.layoutManager = LinearLayoutManager(this)
         swipe_refresh_layout.setOnRefreshListener(this)
+
+        recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = Adapter(list)
         adapter.setProgressColors(Color.parseColor("#007557"))
-        adapter.bindSwipeRefreshLayout(swipe_refresh_layout)
         recyclerView.adapter = adapter
+
+        adapter.bindSwipeRefreshLayout(swipe_refresh_layout)
         adapter.setOnLoadMoreListener(object : KLoadMoreAdapter.OnLoadMoreListener {
             override fun onLoadMore(adapter: KLoadMoreAdapter<*, *>) {
                 loadMore()
@@ -44,6 +49,8 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
     private val refreshData = arrayListOf<String>()
     private val loadMoreData = arrayListOf("load more 1", "load more 2", "load more 3")
 
+    private val headerData = "我是头部信息"
+
     init {
         (0 until 50).mapTo(refreshData) { "刷新的数据 $it" }
 
@@ -55,7 +62,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     fun refresh() {
-        Observable
+        val contentOb = Observable
                 .create<List<String>> {
                     it.onNext(refreshData)
                     it.onComplete()
@@ -66,14 +73,36 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
                     onRefreshSuccess()
                 }
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    list.clear()
-                    list.addAll(it)
-                    adapter.notifyDataSetChanged()
+
+        val headerOb = Observable.create<String> {
+            it.onNext(headerData)
+            it.onComplete()
+        }.subscribeOn(Schedulers.io())
+                .delay(2, TimeUnit.SECONDS)
+                .doOnError {
                     onRefreshSuccess()
-                    toast("刷新完成")
                 }
+                .observeOn(AndroidSchedulers.mainThread())
+
+        Observable.zip(contentOb, headerOb, BiFunction { t1: List<String>, t2: String ->
+            AllData(t1, t2)
+        }).doOnError {
+
+        }.subscribe {
+            list.clear()
+            list.addAll(it.list)
+            adapter.addHeaderAdapter(createHeader(it.header))
+            adapter.notifyDataSetChanged()
+            onRefreshSuccess()
+            toast("刷新完成")
+        }
     }
+
+    fun createHeader(content: String): KHeaderAdapter<*, *> {
+        return HeaderAdapter(content)
+    }
+
+    data class AllData(val list: List<String>, val header: String)
 
     fun toast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
@@ -128,7 +157,31 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    class VH(itemView: View?) : UltimateRecyclerviewViewHolder<String>(itemView) {
+    class VH(itemView: View?) : RecyclerView.ViewHolder(itemView) {
         val textView = itemView?.findViewById<TextView>(R.id.textView)
+    }
+
+    class HeaderAdapter(data: String?) : KHeaderAdapter<String, HeaderHolder>(data) {
+        override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): HeaderFooterHolder? {
+            if (parent == null) {
+                return null
+            }
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_text, parent, false)
+            return HeaderHolder(view)
+        }
+
+        override fun onBindData(holder: HeaderHolder, position: Int) {
+            holder.textView?.text = data
+        }
+
+        override fun itemViewType(): Int {
+            return 1001
+        }
+    }
+
+    class HeaderHolder(itemView: View?) : HeaderFooterHolder(itemView) {
+
+        val textView: TextView? by lazy { itemView?.findViewById<TextView>(R.id.textView) }
+
     }
 }
