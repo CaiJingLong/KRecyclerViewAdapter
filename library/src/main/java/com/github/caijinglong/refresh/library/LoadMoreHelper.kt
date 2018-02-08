@@ -18,7 +18,13 @@ class LoadMoreHelper(val recyclerView: RecyclerView?, val loadmoreAdapter: KLoad
             override fun onScrolled(rv: RecyclerView?, dx: Int, dy: Int) {
                 super.onScrolled(rv, dx, dy)
                 if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
-                    checkNeedLoadMore(lm)
+                    checkNeedLoadMore(lm) {
+                        loadmoreAdapter.onLoadMore()
+                    }
+                } else {
+                    checkNeedLoadMore(lm) {
+                        loadmoreAdapter.onReleaseToLoad()
+                    }
                 }
             }
 
@@ -27,13 +33,19 @@ class LoadMoreHelper(val recyclerView: RecyclerView?, val loadmoreAdapter: KLoad
                 this.currentState = newState
                 KLog.info("current state is $newState")
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    checkNeedLoadMore(lm)
+                    checkNeedLoadMore(lm){
+                        loadmoreAdapter.onLoadMore()
+                    }
+                }else {
+                    checkNeedLoadMore(lm) {
+                        loadmoreAdapter.onReleaseToLoad()
+                    }
                 }
             }
         })
     }
 
-    fun checkNeedLoadMore(lm: LinearLayoutManager) {
+    fun checkNeedLoadMore(lm: LinearLayoutManager, runnable: (() -> Unit)? = null) {
         KLog.info("checkLoad start")
         if (!loadmoreAdapter.enableLoadMore || loadmoreAdapter.loadMoring) {
             KLog.info("not loadMore")
@@ -49,7 +61,7 @@ class LoadMoreHelper(val recyclerView: RecyclerView?, val loadmoreAdapter: KLoad
         val itemPosition = lm.findLastVisibleItemPosition()
         KLog.info("the loadMore")
         if (itemPosition >= loadmoreAdapter.itemCount - 1) {
-            loadmoreAdapter.onLoadMore()
+            runnable?.invoke()
         }
     }
 

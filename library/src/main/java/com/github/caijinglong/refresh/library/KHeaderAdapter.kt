@@ -2,11 +2,12 @@ package com.github.caijinglong.refresh.library
 
 import android.support.v7.widget.RecyclerView
 import android.view.View
+import android.view.ViewGroup
 
 /**
  * Created by cai on 2018/2/8.
  */
-abstract class KAdapter<Data, VH : HeaderFooterHolder?>(var data: Data?) : RecyclerView.Adapter<VH>() {
+abstract class KAdapter<Data, VH : HeaderFooterHolder?>(var data: Data?) : RecyclerView.Adapter<HeaderFooterHolder>() {
 
     override fun getItemCount(): Int {
         return 1
@@ -16,12 +17,21 @@ abstract class KAdapter<Data, VH : HeaderFooterHolder?>(var data: Data?) : Recyc
         return itemViewType()
     }
 
-//    @Suppress("UNCHECKED_CAST")
-//    override fun onBindViewHolder(holder: VH?, position: Int) {
-//        onBindData(holder as VH, position)
-//    }
+    @Suppress("UNCHECKED_CAST")
+    override fun onBindViewHolder(holder: HeaderFooterHolder?, position: Int) {
+        onBindData(holder as VH, position)
+    }
 
-//    abstract fun onBindData(holder: VH, position: Int)
+    abstract fun onBindData(holder: VH, position: Int)
+
+    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): VH? {
+        if (parent == null) {
+            return null
+        }
+        return onCreateHolder(parent, viewType)
+    }
+
+    abstract fun onCreateHolder(parent: ViewGroup, viewType: Int): VH
 
     abstract fun itemViewType(): Int
 

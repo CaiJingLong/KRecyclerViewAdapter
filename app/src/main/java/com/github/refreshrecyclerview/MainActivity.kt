@@ -1,5 +1,6 @@
 package com.github.refreshrecyclerview
 
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
@@ -13,6 +14,7 @@ import android.widget.TextView
 import android.widget.Toast
 import com.github.caijinglong.refresh.library.HeaderFooterHolder
 import com.github.caijinglong.refresh.library.KHeaderAdapter
+import com.github.caijinglong.refresh.library.KLoadMoreAble
 import com.github.caijinglong.refresh.library.KLoadMoreAdapter
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -36,12 +38,38 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
         adapter.setProgressColors(Color.parseColor("#007557"))
         recyclerView.adapter = adapter
 
+        setCustomText()
+
         adapter.bindSwipeRefreshLayout(swipe_refresh_layout)
         adapter.setOnLoadMoreListener(object : KLoadMoreAdapter.OnLoadMoreListener {
             override fun onLoadMore(adapter: KLoadMoreAdapter<*, *>) {
                 loadMore()
             }
         })
+    }
+
+    private fun setCustomText() {
+        val inflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val loadView = inflater.inflate(R.layout.layout_custom_loading, recyclerView, false)
+        val loadText = loadView.findViewById<TextView>(R.id.tv_load_text)
+        val able: KLoadMoreAble = object : KLoadMoreAble {
+            override fun onLoadMoreStart() {
+                loadText.text = "加载中..."
+            }
+
+            override fun onLoadMoreEnd() {
+                loadText.text = "加载完成"
+            }
+
+            override fun onNoMoreData() {
+                loadText.text = "没有更多数据了"
+            }
+
+            override fun onReleaseToLoad() {
+                loadText.text = "松手加载"
+            }
+        }
+        adapter.setLoadMoreView(loadView, able)
     }
 
     private val list = arrayListOf<String>()
@@ -68,7 +96,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
                     it.onComplete()
                 }
                 .subscribeOn(Schedulers.io())
-                .delay(2, TimeUnit.SECONDS)
+                .delay(300, TimeUnit.MILLISECONDS)
                 .doOnError {
                     onRefreshSuccess()
                 }
@@ -78,7 +106,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
             it.onNext(headerData)
             it.onComplete()
         }.subscribeOn(Schedulers.io())
-                .delay(2, TimeUnit.SECONDS)
+                .delay(300, TimeUnit.MILLISECONDS)
                 .doOnError {
                     onRefreshSuccess()
                 }
@@ -91,14 +119,20 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
         }.subscribe {
             list.clear()
             list.addAll(it.list)
-            adapter.addHeaderAdapter(createHeader(it.header))
+            if (header == null) {
+                header = createHeader(it.header)
+                adapter.addHeaderAdapter(header!!)
+            }
+            header?.data = it.header
             adapter.notifyDataSetChanged()
             onRefreshSuccess()
             toast("刷新完成")
         }
     }
 
-    fun createHeader(content: String): KHeaderAdapter<*, *> {
+    var header: KHeaderAdapter<String, *>? = null
+
+    fun createHeader(content: String): KHeaderAdapter<String, *> {
         return HeaderAdapter(content)
     }
 
@@ -122,7 +156,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
                     it.onNext(loadMoreData)
                     it.onComplete()
                 }
-                .delay(2, TimeUnit.SECONDS)
+                .delay(300, TimeUnit.MILLISECONDS)
                 .doOnError {
                     onLoadmoreSuccess()
                 }
@@ -162,21 +196,20 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     class HeaderAdapter(data: String?) : KHeaderAdapter<String, HeaderHolder>(data) {
-        override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): HeaderHolder? {
-            if (parent == null) {
-                return null
-            }
+
+        override fun onCreateHolder(parent: ViewGroup, viewType: Int): HeaderHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_text, parent, false)
             return HeaderHolder(view)
         }
 
-        override fun onBindViewHolder(holder: HeaderHolder?, position: Int) {
-            holder?.textView?.text = data
+        override fun onBindData(holder: HeaderHolder, position: Int) {
+            holder.textView?.text = data
         }
 
         override fun itemViewType(): Int {
             return 1001
         }
+
     }
 
     class HeaderHolder(itemView: View?) : HeaderFooterHolder(itemView) {

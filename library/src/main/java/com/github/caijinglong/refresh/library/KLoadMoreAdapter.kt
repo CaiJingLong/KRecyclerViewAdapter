@@ -26,23 +26,17 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
         set(value) {
             field = value
             helper?.onLoadingChange(value)
-            val v = loadmoreView
-            if (v is KLoadMoreAble) {
-                if (value) {
-                    v.onLoadMoreStart()
-                } else {
-                    v.onLoadMoreEnd()
-                }
+            if (value) {
+                loadMoreAble?.onLoadMoreStart()
+            } else {
+                loadMoreAble?.onLoadMoreEnd()
             }
         }
 
     var noMoreData = false
         set(value) {
             field = value
-            val v = loadmoreView
-            if (v is KLoadMoreAble) {
-                v.onNoMoreData()
-            }
+            loadMoreAble?.onNoMoreData()
         }
 
     override fun getItemCount(): Int {
@@ -119,11 +113,15 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
         return position - getHeaderCount()
     }
 
-    var loadmoreView: View? = null
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
+    private var loadmoreView: View? = null
+
+    private var loadMoreAble: KLoadMoreAble? = null
+
+    fun setLoadMoreView(view: View?, able: KLoadMoreAble? = null) {
+        this.loadmoreView = view
+        this.loadMoreAble = able
+        notifyItemChanged(itemCount - 1)
+    }
 
     abstract fun bindViewHolder(holder: VH?, position: Int, item: Data)
 
@@ -149,10 +147,14 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
             return if (loadmoreView == null) {
                 val view = createDefaultLoadMoreView(parent)
                 loadmoreView = view
-                val able: KLoadMoreAble? = if (view is KLoadMoreAble) view else null
+                val able: KLoadMoreAble? = when {
+                    this.loadMoreAble != null -> this.loadMoreAble
+                    view is KLoadMoreAble -> view
+                    else -> null
+                }
                 KLoadMoreHolder(view, able)
             } else {
-                KLoadMoreHolder(loadmoreView, null)
+                KLoadMoreHolder(loadmoreView, this.loadMoreAble)
             }
         }
 
@@ -231,6 +233,10 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
         this.mProgressColors = colors
         swipeRefreshLayout?.setColorSchemeColors(*colors)
     }
+
+    fun onReleaseToLoad() {
+        this.loadMoreAble?.onReleaseToLoad()
+    }
 }
 
 class DefaultLoadMoreView @JvmOverloads constructor(
@@ -259,6 +265,10 @@ class DefaultLoadMoreView @JvmOverloads constructor(
         mTvLoadText.text = "没有更多数据了"
     }
 
+    override fun onReleaseToLoad() {
+        mTvLoadText.text = "松手加载"
+    }
+
     fun setProgressColors(vararg colors: Int) {
         mViewProgress.progressDrawable.setColorSchemeColors(*colors)
     }
@@ -272,6 +282,7 @@ interface KLoadMoreAble {
 
     fun onNoMoreData()
 
+    fun onReleaseToLoad()
 }
 
 class KLoadMoreHolder(itemView: View?, var loadMoreAble: KLoadMoreAble?) : RecyclerView.ViewHolder(itemView) {

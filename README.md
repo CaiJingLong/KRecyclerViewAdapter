@@ -41,18 +41,46 @@ adapter.setProgressColors(Color.parseColor("#007557")) //参考SwipeRefreshLayou
 #### 自定义View
 > 特别说明:这里如果需要响应 加载过程的状态变化结束,则需要实现KLoadMoreAble接口
 
-```
-val loadMoreView = LoadMoreView()
-adapter.loadmoreView = loadMoreView
+```kotlin
+val inflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+val loadView = inflater.inflate(R.layout.layout_custom_loading, recyclerView, false)
+val loadText = loadView.findViewById<TextView>(R.id.textView)
+val able: KLoadMoreAble = object : KLoadMoreAble {
+    override fun onLoadMoreStart() {
+        loadText.text = "加载中"
+    }
+
+    override fun onLoadMoreEnd() {
+        loadText.text = "加载完成"
+    }
+
+    override fun onNoMoreData() {
+        loadText.text = "没有更多数据了"
+    }
+}
+adapter.setLoadMoreView(loadView, able)
 ```
 
 #### 复写adapter中的createDefaultLoadMoreView 方法
 ```
 override fun createDefaultLoadMoreView(parent: ViewGroup): View {
-        val defaultLoadMoreView = LayoutInflater.from(parent.context).inflate(R.layout.k_layout_default_loadmore, parent, false) as DefaultLoadMoreView
-        defaultLoadMoreView.mViewProgress.progressDrawable.setColorSchemeColors(*mProgressColors)
-        return defaultLoadMoreView
+    val inflater = parent.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    val loadView = inflater.inflate(R.layout.layout_custom_loading, recyclerView, false)
+    val loadText = loadView.findViewById<TextView>(R.id.textView)
+    val able: KLoadMoreAble = object : KLoadMoreAble {
+        override fun onLoadMoreStart() {
+            loadText.text = "加载中"
+        }
+
+        override fun onLoadMoreEnd() {
+            loadText.text = "加载完成"
+        }
+
+        override fun onNoMoreData() {
+            loadText.text = "没有更多数据了"
+        }
     }
+    this.setLoadMoreView(loadView, able)
 ```
 
 ### 单独使用
