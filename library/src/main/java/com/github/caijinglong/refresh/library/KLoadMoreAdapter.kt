@@ -60,10 +60,17 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
         val headerCount = headerAdapterList.count()
 
         var loadMoreCount = 0
-        if (enableLoadMore) {
+        if (enableLoadMore && !noMoreData) {
             loadMoreCount = 1
         }
-        return (list.size) + loadMoreCount + headerCount
+
+        var emptyCount = 0
+
+        if (isNeedShowEmptyView()) {
+            emptyCount++
+        }
+
+        return (list.size) + loadMoreCount + headerCount + emptyCount
     }
 
     //cache the viewType
@@ -71,6 +78,10 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
     private val typePositionMap = HashMap<Int, Int>()
 
     override fun getItemViewType(position: Int): Int {
+        if (isNeedShowEmptyView()) {
+            return TYPE_EMPTY_VIEW
+        }
+
         if (position < headerAdapterList.count()) {
             val itemViewType = headerAdapterList[position].itemViewType()
             headerTypeSet.add(itemViewType)
@@ -106,6 +117,9 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
         val itemViewType = getItemViewType(position)
         if (itemViewType == TYPE_LOAD_MORE) {
+            return
+        }
+        if (itemViewType == TYPE_EMPTY_VIEW) {
             return
         }
         if (headerTypeSet.contains(itemViewType)) {
@@ -175,7 +189,21 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
             }
         }
 
+        if (viewType == TYPE_EMPTY_VIEW) {
+            initEmptyView(parent)
+            return KEmptyViewHolder(emptyView)
+        }
+
         return newViewHolder(parent, viewType)
+    }
+
+
+    var emptyView: View? = null
+
+    private fun initEmptyView(parent: ViewGroup) {
+        if (emptyView == null) {
+            emptyView = LayoutInflater.from(parent.context).inflate(R.layout.k_layout_empty_view, parent, false)
+        }
     }
 
     abstract fun newViewHolder(parent: ViewGroup, viewType: Int): VH
@@ -198,6 +226,7 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
 
     companion object {
         val TYPE_LOAD_MORE = 300001
+        val TYPE_EMPTY_VIEW = 300002
     }
 
     private var onLoadMoreListener: OnLoadMoreListener? = null
@@ -217,6 +246,10 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
     }
 
     open fun onDataChange() {
+    }
+
+    private fun isNeedShowEmptyView(): Boolean {
+        return headerAdapterList.size + list.size == 0
     }
 
     inner class DataObserver : RecyclerView.AdapterDataObserver() {
@@ -254,6 +287,7 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
     fun onReleaseToLoad() {
         this.loadMoreAble?.onReleaseToLoad()
     }
+
 }
 
 class DefaultLoadMoreView @JvmOverloads constructor(
@@ -317,3 +351,5 @@ class KLoadMoreHolder(itemView: View?, var loadMoreAble: KLoadMoreAble?) : Recyc
     }
 
 }
+
+class KEmptyViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView)
