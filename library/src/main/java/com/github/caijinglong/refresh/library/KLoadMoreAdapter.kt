@@ -13,6 +13,7 @@ import android.widget.TextView
 
 /**
  * Created by cai on 2018/2/7.
+ * loadMore data adapter for the RecyclerView
  */
 abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: List<Data>, var swipeRefreshLayout: SwipeRefreshLayout? = null) : RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
 
@@ -31,6 +32,22 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
             } else {
                 loadMoreAble?.onLoadMoreEnd()
             }
+        }
+
+    var isLoading
+        set(value) {
+            loadMoring = value
+        }
+        get() = loadMoring
+
+    var isRefreshing: Boolean
+        set(value) {
+            swipeRefreshLayout?.isRefreshing = value
+        }
+        get() {
+            if (swipeRefreshLayout == null)
+                return false
+            return swipeRefreshLayout!!.isRefreshing
         }
 
     var noMoreData = false

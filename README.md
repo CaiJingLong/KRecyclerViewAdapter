@@ -30,22 +30,31 @@
 
 ### 加载完成调用(必须)
 用于回调底部loadMore,用于显示完成状态
+set/get
+下面是废弃属性,保持有效
 ```
 adapter.loadMoring = false
 ```
 
-### 没有更多数据调用
+新属性
+```
+adapter.isLoading = false
+```
 
+### 没有更多数据调用
+set/get
 ```
 adapter.noMoreData = true // 这个会暂时更多数据的加载,如需开启设置为false,下拉刷新时内部会设置为false
 ```
 
 ### 需要关闭加载更多功能
+set/get
 ```
 adapter.enableLoadMore = false //如果有需求,需要关闭加载更多功能,则使用这个开关
 ```
 
 ### 监听回调
+set
 ```
 adapter.setOnLoadMoreListener(object : KLoadMoreAdapter.OnLoadMoreListener {
             override fun onLoadMore(adapter: KLoadMoreAdapter<*, *>) {
@@ -55,6 +64,7 @@ adapter.setOnLoadMoreListener(object : KLoadMoreAdapter.OnLoadMoreListener {
 ```
 
 ### 设置刷新的颜色
+set
 ```
 adapter.setProgressColors(Color.parseColor("#007557")) //参考SwipeRefreshLayout.setColorSchemeColors(int... colors)
 ```
@@ -155,6 +165,11 @@ adapter.bindSwipeRefreshLayout(swipe_refresh_layout)
 adapter.unbindSwipeRefreshLayout()
 ```
 
+#### 设置刷新状态
+0.8.4新增属性
+set/get
+    adapter.isRefreshing //与SwipeRefeshLayout的isRefreshing相等,srl为空时,返回false
 
-#### 开源协议
+
+## 开源协议
 Apache 2.0
