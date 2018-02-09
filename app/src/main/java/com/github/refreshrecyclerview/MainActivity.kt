@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = Adapter(list)
+        adapter.isShowEmptyView = true
         adapter.setProgressColors(Color.parseColor("#007557"))
         recyclerView.adapter = adapter
 
@@ -82,7 +83,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
     init {
         (0 until 50).mapTo(refreshData) { "刷新的数据 $it" }
 
-        list.addAll(refreshData)
+//        list.addAll(refreshData)
     }
 
     override fun onRefresh() {
@@ -118,17 +119,25 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
 
         }.subscribe {
             list.clear()
-            list.addAll(it.list)
-            if (header == null) {
-                header = createHeader(it.header)
-                adapter.addHeaderAdapter(header!!)
+
+            if (count % 3 == 0) {
+                list.addAll(it.list)
             }
-            header?.data = it.header
+
+            count++
+//            list.addAll(it.list)
+//            if (header == null) {
+//                header = createHeader(it.header)
+//                adapter.addHeaderAdapter(header!!)
+//            }
+//            header?.data = it.header
             adapter.notifyDataSetChanged()
             onRefreshSuccess()
             toast("刷新完成")
         }
     }
+
+    var count = 0
 
     var header: KHeaderAdapter<String, *>? = null
 

@@ -57,6 +57,10 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
         }
 
     override fun getItemCount(): Int {
+        var emptyCount = 0
+        if (isNeedShowEmptyView()) {
+            emptyCount++
+        }
         val headerCount = headerAdapterList.count()
 
         var loadMoreCount = 0
@@ -64,12 +68,8 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
             loadMoreCount = 1
         }
 
-        var emptyCount = 0
 
-        if (isNeedShowEmptyView()) {
-            emptyCount++
-        }
-
+        KLog.info("list : ${list.size} ,loadMore:$loadMoreCount ,headerCount:$headerCount ,emptyCount: $emptyCount")
         return (list.size) + loadMoreCount + headerCount + emptyCount
     }
 
@@ -78,10 +78,6 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
     private val typePositionMap = HashMap<Int, Int>()
 
     override fun getItemViewType(position: Int): Int {
-        if (isNeedShowEmptyView()) {
-            return TYPE_EMPTY_VIEW
-        }
-
         if (position < headerAdapterList.count()) {
             val itemViewType = headerAdapterList[position].itemViewType()
             headerTypeSet.add(itemViewType)
@@ -91,6 +87,10 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
 
         if (enableLoadMore && position == itemCount - 1) {
             return TYPE_LOAD_MORE
+        }
+
+        if (isNeedShowEmptyView()) {
+            return TYPE_EMPTY_VIEW
         }
         return getChildItemType(getRealPosition(position))
     }
@@ -203,6 +203,8 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
     private fun initEmptyView(parent: ViewGroup) {
         if (emptyView == null) {
             emptyView = LayoutInflater.from(parent.context).inflate(R.layout.k_layout_empty_view, parent, false)
+            val textView = emptyView?.findViewById<TextView>(R.id.tv_empty_tip)
+            textView?.text = emptyText
         }
     }
 
@@ -248,9 +250,20 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
     open fun onDataChange() {
     }
 
-    private fun isNeedShowEmptyView(): Boolean {
+    var isShowEmptyView = false
+
+    fun isNeedShowEmptyView(): Boolean {
+        if (!isShowEmptyView) {
+            return false
+        }
         return headerAdapterList.size + list.size == 0
     }
+
+    var emptyText:String? = "还没有数据哦"
+
+//    fun setEmptyText(text: String) {
+//        emptyText = text
+//    }
 
     inner class DataObserver : RecyclerView.AdapterDataObserver() {
         override fun onChanged() {

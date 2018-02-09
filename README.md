@@ -72,7 +72,9 @@ adapter.setProgressColors(Color.parseColor("#007557")) //参考SwipeRefreshLayou
 ### 自定义LoadMoreView
 
 #### 自定义View
-> 特别说明:这里如果需要响应 加载过程的状态变化结束,则需要实现KLoadMoreAble接口
+> 特别说明:这里如果需要响应 加载过程的状态变化结束,则需要实现KLoadMoreAble接口KLoadMoreAble可以为空
+> 也可以让自定义View实现KLoadMoreAble来实现相同效果
+> KLoadMoreAble和view同时都有时,前者优先于后者
 
 ```kotlin
 val inflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -115,6 +117,28 @@ override fun createDefaultLoadMoreView(parent: ViewGroup): View {
     }
     this.setLoadMoreView(loadView, able)
 ```
+
+### EmptyView
+
+#### 开关
+0.8.5 新增 默认关闭
+
+```
+adapter.isShowEmptyView = true
+```
+
+注意:这里如果设置为true时,当EmptyView显示且SwipeRefreshLayout可用,loadMore默认会被关闭,只能通过下拉刷新来更新数据,如不存在SwipeRefreshLayout则下拉刷新功能会开启
+
+#### 自定义默认文字
+优先级低于自定义EmptyView
+```
+adapter.emptyText = "没有数据"
+```
+
+#### 自定义EmptyView
+
+    val view:View = createView() //自己实现View
+    adapter.emptyView = view //可为空,为空则使用默认的空数据View
 
 ### 单独使用
 

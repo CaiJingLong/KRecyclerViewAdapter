@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView
 
 /**
  * Created by cai on 2018/2/7.
+ * the loadmore's helper
  */
 class LoadMoreHelper(val recyclerView: RecyclerView?, val loadmoreAdapter: KLoadMoreAdapter<*, *>, var swipeRefreshLayout: SwipeRefreshLayout?) {
 
@@ -33,10 +34,10 @@ class LoadMoreHelper(val recyclerView: RecyclerView?, val loadmoreAdapter: KLoad
                 this.currentState = newState
                 KLog.info("current state is $newState")
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    checkNeedLoadMore(lm){
+                    checkNeedLoadMore(lm) {
                         loadmoreAdapter.onLoadMore()
                     }
-                }else {
+                } else {
                     checkNeedLoadMore(lm) {
                         loadmoreAdapter.onReleaseToLoad()
                     }
@@ -49,6 +50,9 @@ class LoadMoreHelper(val recyclerView: RecyclerView?, val loadmoreAdapter: KLoad
         KLog.info("checkLoad start")
         if (!loadmoreAdapter.enableLoadMore || loadmoreAdapter.loadMoring) {
             KLog.info("not loadMore")
+            return
+        }
+        if (loadmoreAdapter.isNeedShowEmptyView() && swipeRefreshLayout != null) {
             return
         }
         if (loadmoreAdapter.noMoreData) {

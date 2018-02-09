@@ -4,6 +4,7 @@ import android.util.Log
 
 /**
  * Created by cai on 2018/2/7.
+ * 日志帮助类
  */
 class KLog private constructor() {
 
