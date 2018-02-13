@@ -11,9 +11,9 @@ import android.support.v7.widget.RecyclerView
 class LoadMoreHelper(val recyclerView: RecyclerView?, val loadmoreAdapter: KLoadMoreAdapter<*, *>, var swipeRefreshLayout: SwipeRefreshLayout?) {
 
     fun enableLoadMore() {
-        val lm = recyclerView?.layoutManager as? LinearLayoutManager ?: return
+        val lm = recyclerView?.layoutManager
 
-        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        recyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             var currentState = RecyclerView.SCROLL_STATE_IDLE
 
             override fun onScrolled(rv: RecyclerView?, dx: Int, dy: Int) {
@@ -46,7 +46,12 @@ class LoadMoreHelper(val recyclerView: RecyclerView?, val loadmoreAdapter: KLoad
         })
     }
 
-    fun checkNeedLoadMore(lm: LinearLayoutManager, runnable: (() -> Unit)? = null) {
+    fun checkNeedLoadMore(lm: RecyclerView.LayoutManager?, runnable: (() -> Unit)? = null) {
+        if (lm !is LinearLayoutManager) {
+            KLog.info("the adapter not support the LayoutManager")
+            return
+        }
+
         KLog.info("checkLoad start")
         if (!loadmoreAdapter.enableLoadMore || loadmoreAdapter.loadMoring) {
             KLog.info("not loadMore")
