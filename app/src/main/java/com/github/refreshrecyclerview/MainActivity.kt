@@ -41,12 +41,20 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
 
         setCustomText()
 
-        adapter.bindSwipeRefreshLayout(swipe_refresh_layout)
-        adapter.setOnLoadMoreListener(object : KLoadMoreAdapter.OnLoadMoreListener {
-            override fun onLoadMore(adapter: KLoadMoreAdapter<*, *>) {
-                loadMore()
-            }
-        })
+        with(adapter) {
+            bindSwipeRefreshLayout(swipe_refresh_layout)
+            setOnLoadMoreListener(object : KLoadMoreAdapter.OnLoadMoreListener {
+                override fun onLoadMore(adapter: KLoadMoreAdapter<*, *>) {
+                    loadMore()
+                }
+            })
+
+            setOnItemClickListener(object : KLoadMoreAdapter.OnItemClickListener<String> {
+                override fun onAdapterItemClick(data: String, position: Int) {
+                    Toast.makeText(this@MainActivity, data, Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
     }
 
     private fun setCustomText() {

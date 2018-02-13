@@ -129,6 +129,9 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
         val realPosition = getRealPosition(position)
         val data = list[realPosition]
         try {
+            holder?.itemView?.setOnClickListener {
+                this.onItemClickListener?.onAdapterItemClick(list[position], position)
+            }
             bindViewHolder(holder as VH?, realPosition, data)
         } catch (e: Throwable) {
 
@@ -241,6 +244,16 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
         fun onLoadMore(adapter: KLoadMoreAdapter<*, *>)
     }
 
+    private var onItemClickListener: OnItemClickListener<Data>? = null
+
+    fun setOnItemClickListener(onItemClickListener: OnItemClickListener<Data>?) {
+        this.onItemClickListener = onItemClickListener
+    }
+
+    interface OnItemClickListener<in Data> {
+        fun onAdapterItemClick(data: Data, position: Int)
+    }
+
     fun onLoadMore() {
         loadMoring = true
         KLog.info("start loadmore")
@@ -259,7 +272,7 @@ abstract class KLoadMoreAdapter<Data, VH : RecyclerView.ViewHolder?>(val list: L
         return headerAdapterList.size + list.size == 0
     }
 
-    var emptyText:String? = "还没有数据哦"
+    var emptyText: String? = "还没有数据哦"
 
 //    fun setEmptyText(text: String) {
 //        emptyText = text
