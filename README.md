@@ -3,6 +3,8 @@
 一个滚动到底刷新组件,可以结合SwipeRefreshLayout使用
 使用kotlin开发
 
+[![Release](https://jitpack.io/v/caijinglong/KRecyclerViewAdapter.svg)](https://jitpack.io/#caijinglong/KRecyclerViewAdapter)
+
 ## install
 
 当前最新版本可以查看tag
@@ -27,6 +29,18 @@
     }
 ```
 ## use
+
+### 点击事件
+
+泛型类型和Adapter的Data泛型一致
+
+```kotlin
+            setOnItemClickListener(object : KLoadMoreAdapter.OnItemClickListener<String> {
+                override fun onAdapterItemClick(data: String, position: Int) {
+                    Toast.makeText(this@MainActivity, data, Toast.LENGTH_SHORT).show()
+                }
+            })
+```
 
 ### 加载完成调用(必须)
 用于回调底部loadMore,用于显示完成状态
