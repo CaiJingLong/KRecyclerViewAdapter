@@ -208,6 +208,83 @@ adapter.unbindSwipeRefreshLayout()
 set/get
     adapter.isRefreshing //与SwipeRefeshLayout的isRefreshing相等,srl为空时,返回false
 
+### KRefreshLayout
+
+新的控件
+KRefreshLayout(内部封装了KLoadMoreAdapter 和SwipeRefreshLayout)
+用于处理SwipeRefreshLayout和Adapter的关系
+
+#### use
+
+private val layoutRefresh: KRefreshLayout<GoodData, VH> by bindView(R.id.layout_refresh)
+
+```kotlin
+ layoutRefresh.viewHolderBuilder = VH.Companion
+
+        layoutRefresh.setOnLoadDataListener(object : KRefreshLayout.OnLoadDataListener {
+            override fun onLoadMore(adapter: KLoadMoreAdapter<*, *>) {
+                listPresenter.loadData()
+                        ?.subscribe {
+                            layoutRefresh.addData(it.list, false)
+                        }
+            }
+
+            override fun onRefresh() {
+                listPresenter.refreshData()
+                        ?.subscribe {
+                            layoutRefresh.addData(it.list, true)
+                        }
+            }
+        })
+
+        layoutRefresh.setOnItemClickListener(object : KLoadMoreAdapter.OnItemClickListener<GoodData> {
+            override fun onAdapterItemClick(data: GoodData, position: Int) {
+                Toast.makeText(this@KListActivity, data.id, Toast.LENGTH_SHORT).show()
+            }
+        })
+```
+
+#### 方法/属性
+
+1. layoutRefresh.viewHolderBuilder = VH.Companion
+
+```
+    lateinit var viewHolderBuilder: KViewHolderBuilder<Data, VH>
+
+    interface ViewHolderBuilder<VH> {
+
+        fun build(parent: ViewGroup, viewType: Int): VH
+    }
+
+    interface DataBinder<Data, VH> {
+        fun bindData(holder: VH?, position: Int, item: Data)
+    }
+
+    interface KViewHolderBuilder<Data, VH> : ViewHolderBuilder<VH>, DataBinder<Data, VH>
+
+```
+
+提供创建ViewHolder和绑定holder数据的接口,必传
+
+2. setOnItemClickListener
+
+设置条目的点击事件
+
+```
+layoutRefresh.setOnItemClickListener(object : KLoadMoreAdapter.OnItemClickListener<GoodData> {
+            override fun onAdapterItemClick(data: GoodData, position: Int) {
+                Toast.makeText(this@KListActivity, data.id, Toast.LENGTH_SHORT).show()
+            }
+        })
+```
+
+3. setOnLoadDataListener(listener:OnLoadDataListener)
+
+设置下拉刷新和上拉加载的回调
+
+方法签名:
+
+`interface OnLoadDataListener : KLoadMoreAdapter.OnLoadMoreListener, SwipeRefreshLayout.OnRefreshListener`
 
 ## 开源协议
 Apache 2.0
